@@ -1,50 +1,49 @@
-#Noch nicht ganz fertig
+#Asteroids Game
 from microbit import *
 import time
 import random
 
-x = 2
-xr = random.randint(0,4)
-y = 0
-i = 0
+ship_x = 2
+ast_x = random.randint(0,4)
+ast_y = 0
+last_movement = time.ticks_ms()
 
 while True:
-    #Mein Schiff
-    display.set_pixel(x, 4, 9)
+    #My Ship
+    display.set_pixel(ship_x, 4, 9)
 
-    #Bewegung von Mein Schiff nach linggs
+    #Moves My Ship to the left
     if button_a.get_presses() > 0:
-        display.set_pixel(x, 4, 0)
-        x -= 1
-        if x < 0:
-            x = 0
+        display.set_pixel(ship_x, 4, 0)
+        ship_x -= 1
+        if ship_x < 0:
+            ship_x = 0
 
-    #Bewegung von Mein Schiff nach rechts
+    #Moves My Ship to the right
     if button_b.get_presses() > 0:
-        display.set_pixel(x, 4, 0)
-        x += 1
-        if x > 4:
-            x = 4
+        display.set_pixel(ship_x, 4, 0)
+        ship_x += 1
+        if ship_x > 4:
+            ship_x = 4
     time.sleep(0.1)
 
-    #Flüügende Brocke
-    display.set_pixel(xr, y, 3)
-    i += 1
-    if i == 15:
-        y += 1
-        i = 0
-        display.set_pixel(xr, y-1, 0)
-        if y >= 5:
-            y = 0
-            xr = random.randint(0,4)
+    #Asteroid
+    display.set_pixel(ast_x, ast_y, 3)
+    current_time = time.ticks_ms()
+    if current_time - last_movement > 500:
+        ast_y += 1
+        last_movement = current_time
+        display.set_pixel(ast_x, ast_y - 1, 0)
+        if ast_y >= 5:
+            ast_y = 0
+            ast_x = random.randint(0,4)
 
-    #If Mein Schiff trifft auf Flüügende Brocke
-    if x == xr and y == 4:
+    #My ship collides with Asteroid
+    if ship_x == ast_x and ast_y == 4:
         display.show(Image.SKULL)
         time.sleep(5)
         display.clear()
-        x = 2
-        xr = random.randint(0,4)
-        y = 0
-        i = 0
-
+        ship_x = 2
+        ast_x = random.randint(0,4)
+        ast_y = 0
+        last_movement = time.ticks_ms()
