@@ -24,6 +24,7 @@ while True:
     ast_y = 0
     ast_delay = 500
     time_till_speeding = 15000 #gets higher after every level
+    time_till_speeding_increase = 2000
     score = 0 #gets higher after every asteroid you pass
     level = 1
 
@@ -42,7 +43,7 @@ while True:
             #asteroids speed update
             if current_time - time_ast_speed_update > time_till_speeding:
                 level += 1
-                time_till_speeding += 2000
+                time_till_speeding += time_till_speeding_increase
                 display.scroll("Level {0}".format(level), SCROLL_DELAY)
                 time_ast_speed_update = time.ticks_ms()
                 ast_delay -= AST_SPEED_INCREASE
