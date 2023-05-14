@@ -11,9 +11,10 @@ SHIP_BRIGHTNESS = 9
 AST_BRIGHTNESS = 3
 SCROLL_DELAY = 100
 SPAWN_DIFFERENCE = 500
-SPAWN_PROBABILITY = 50
+SPAWN_PROBABILITY = 40
 
-asteroids = []
+active_asteroids = []
+not_active_asteroids = []
 
 # Class
 class Asteroid():
@@ -33,6 +34,9 @@ class Asteroid():
             if self.ast_y > EDGE_Y_DOWN:
                 self.is_active = False
 
+    def display(self):
+        display.set_pixel(self.ast_x, self.ast_y, AST_BRIGHTNESS)
+
 while True:
 
     game_over = False
@@ -45,7 +49,7 @@ while True:
     display.scroll("Press button", SCROLL_DELAY)
     time.sleep(2)
     if button_a.get_presses() > 0 or button_b.get_presses() > 0:
-       display.scroll("Let's goo", SCROLL_DELAY)
+       pass
     else:
         game_over = True
 
@@ -54,15 +58,23 @@ while True:
     while game_over != True:
 
         #Spawn
-        spawn_time = time.ticks_ms()
-        if spawn_time - ast.last_spawn > SPAWN_DIFFERENCE and spawn_probability <= SPAWN_PROBABILITY:
-            asteroids.append(ast)
+        for ast in active_asteroids:
+            spawn_time = time.ticks_ms()
+            if  spawn_time - ast.last_spawn > SPAWN_DIFFERENCE and spawn_probability <= SPAWN_PROBABILITY:
+                ast.last_spawn = time.ticks_ms()
+                ast = Asteroid()
+                active_asteroids.append(ast)
 
-        for a in asteroids:
+        #ast update
+        for ast in active_asteroids:
             ast.update()
             if not ast.is_active:
                 score += 1
-                asteroids.pop(a)
+                not_active_asteroids.append(ast)
+
+        # despawn not active asteroids
+        for ast in not_active_asteroids:
+            active_asteroids.pop(ast)
 
         #update player (button a)
         if button_a.get_presses() > 0:
@@ -81,14 +93,14 @@ while True:
             display.show(Image.SAD)
             time.sleep(2)
             display.scroll("Game over", SCROLL_DELAY)
-            display.scroll("Your score:", SCROLL_DELAY)
-            display.show(score)
+            display.scroll("Your score: {0}".format(score), SCROLL_DELAY)
             time.sleep(2)
             game_over = True
 
         #Update display
         display.clear()
         display.set_pixel(ship_x, SHIP_Y, SHIP_BRIGHTNESS) #update player position
-        display.set_pixel(ast.ast_x, ast.ast_y, AST_BRIGHTNESS)
+        for ast in active_asteroids:
+            ast.display()
         #short sleep
         time.sleep(0.001)
