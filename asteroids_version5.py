@@ -7,11 +7,10 @@ AST_BRIGHTNESS = 3
 EDGE_X_RIGHT = 4
 EDGE_X_LEFT = 0
 EDGE_Y_DOWN = 4
-MAX_ASTEROIDS = 6
+MAX_ASTEROIDS = 5
 SCROLL_DELAY = 100
 SHIP_BRIGHTNESS = 9
 SHIP_Y = 4
-SPAWN_DIFFERENCE = 500
 SPAWN_PROBABILITY = 40
 
 asteroids = []
@@ -22,14 +21,13 @@ class Asteroid():
         self.ast_x = random.randint(0,4)
         self.ast_y = 0
         self.ast_brightness = AST_BRIGHTNESS
-        self.ast_speed = random.randint(50,2000)
+        self.ast_speed = random.randint(50,1000)
         self.last_update = time.ticks_ms()
-        self.spawn_probability = random.randint(1,100)
         self.is_active = True
 
     def update(self):
         current_time = time.ticks_ms()
-        if current_time - self.last_update > self.ast_speed:
+        if  current_time - self.last_update > self.ast_speed:
             self.last_update = time.ticks_ms()
             self.ast_y += 1
             if self.ast_y > EDGE_Y_DOWN:
@@ -60,20 +58,16 @@ class Player():
 
 #Game Loop
 def game_loop():
-
     score = 0
-
     player = Player()
-
-    display.scroll("Press button", SCROLL_DELAY)
     time.sleep(2)
-    if button_a.get_presses() > 0 or button_b.get_presses() > 0:
-       pass
 
     while True:
+        spawn_probability = random.randint(0,100)
+
         #asteroid movement
         asteroid = Asteroid()
-        if len(asteroids) < MAX_ASTEROIDS and asteroid.spawn_probability <= SPAWN_PROBABILITY:
+        if len(asteroids) < MAX_ASTEROIDS and spawn_probability <= SPAWN_PROBABILITY:
             asteroids.append(asteroid)
         for asteroid in asteroids:
             asteroid.update()
@@ -109,6 +103,7 @@ def game_over(score):
     display.scroll("Game over", SCROLL_DELAY)
     display.scroll("Your score: {0}".format(score), SCROLL_DELAY)
     time.sleep(2)
-    game_loop()
+    if button_a.get_presses() > 0 or button_b.get_presses() > 0:
+        game_loop()
 
 game_loop()
