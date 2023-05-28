@@ -26,8 +26,7 @@ class Asteroid():
         self.is_active = True
 
     def update(self):
-        current_time = time.ticks_ms()
-        if  current_time - self.last_update > self.ast_speed:
+        if  time.ticks_ms() - self.last_update > self.ast_speed:
             self.last_update = time.ticks_ms()
             self.ast_y += 1
             if self.ast_y > EDGE_Y_DOWN:
@@ -42,16 +41,20 @@ class Player():
         self.ship_y = SHIP_Y
         self.ship_brightness = SHIP_BRIGHTNESS
 
-    def update_a(self):
-        self.ship_x -= 1
-        if self.ship_x < EDGE_X_LEFT:
-            self.ship_x = EDGE_X_LEFT
+    def update_(self, left):
+        if left == True:
+            self.ship_x -= 1
+            if self.ship_x < EDGE_X_LEFT:
+                self.ship_x = EDGE_X_LEFT
+        else:
+            self.ship_x += 1
+            if self.ship_x > EDGE_X_RIGHT:
+                self.ship_x = EDGE_X_RIGHT
 
     def update_b(self):
         self.ship_x += 1
         if self.ship_x > EDGE_X_RIGHT:
             self.ship_x = EDGE_X_RIGHT
-
 
     def display(self):
         display.set_pixel(self.ship_x, self.ship_y, SHIP_BRIGHTNESS)
@@ -78,11 +81,11 @@ def game_loop():
 
         #update player (button a)
         if button_a.get_presses() > 0:
-            player.update_a()
+            player.update(True)
 
         #update player (button b)
         if button_b.get_presses() > 0:
-            player.update_b()
+            player.update(False)
 
         #collision check and game over
         for asteroid in asteroids:
