@@ -57,7 +57,7 @@ class Game:
  
     def update_asteroids(self):
         for asteroid in self.asteroids:
-            asteroid.update(4)
+            asteroid.update(self.n_y_field)
             if not asteroid.is_active:
                 self.asteroids.pop(self.asteroids.index(asteroid))
  

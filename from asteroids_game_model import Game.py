@@ -1,19 +1,16 @@
 from asteroids_model import Game
 import sys
+import random
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt,QTimer
  
-N_COLUMNS = 4
-N_ROWS = 7
-
-g = Game(N_ROWS, N_COLUMNS) # create Game object
-
-
+N_COLUMNS = 15
+N_ROWS = 9
+ 
 class GridApp(QWidget):
-    def __init__(self, game):
+    def __init__(self):
         super().__init__()
-        self.g = game
         self.COLUMNS = N_COLUMNS
         self.ROWS = N_ROWS
         self.CELL_WIDTH = 70
@@ -23,7 +20,8 @@ class GridApp(QWidget):
         self.initUI()
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
-        self.timer.start(500)  # Trigger the checkSomething function every ... milliseconds
+        self.timer.start(50)  # Trigger the checkSomething function every ... milliseconds
+        self.g = Game(self.COLUMNS, self.ROWS)
  
     def initUI(self):
         self.setWindowTitle('Grid App')
@@ -47,6 +45,7 @@ class GridApp(QWidget):
                 row_layout.addWidget(cell)
                 self.cells.append(cell)
  
+        self.show()
         self.setFixedSize(self.size().width(),self.size().height()) # -> window non-resizable
  
     def draw_cell_at_position(self,x,y,color):
@@ -57,46 +56,59 @@ class GridApp(QWidget):
         cell.setStyleSheet("background-color: {}".format(color.name()))
  
     def draw_all_cells(self):
+        """
+        draw all cells
+        """
+        
         for y in range(self.ROWS):
             for x in range(self.COLUMNS):
-                if y == self.g.player.ship_y and x == self.g.player.ship_x:
-                    player_color = QColor(0,0,255)
-                    self.draw_cell_at_position(x,y,player_color)
                 for asteroid in self.g.asteroids:
                     if y == asteroid.ast_y and x == asteroid.ast_x:
                         ast_color = QColor(255,0,0)
                         self.draw_cell_at_position(x,y,ast_color)
-                else:
-                    empty_cell = QColor(255,255,255)
-                    self.draw_cell_at_position(x,y,empty_cell)
+                        break
+                    else:
+                        empty_cell = QColor(255,255,255)
+                        self.draw_cell_at_position(x,y,empty_cell)
 
+                if y == self.g.player.ship_y and x == self.g.player.ship_x:
+                    player_color = QColor(0,0,255)
+                    self.draw_cell_at_position(x,y,player_color)
+
+                
+    def draw_game_over(self):
+        for y in range(self.ROWS):
+            for x in range(self.COLUMNS):
+                self.draw_cell_at_position(x,y,QColor(0, 0, 0))
+
+ 
     def keyPressEvent(self, event):
         """
         deals with keypressed events
         """
         key = event.key()
         if key == Qt.Key_Right:
-            print('key up pressed')
+            self.g.move_player(1)
         elif key == Qt.Key_Left:
-            print('key down pressed')
-        self.draw_all_cells()
+            self.g.move_player(-1)
+        elif key == Qt.Key_Up and self.g.run == False:
+            self.g.__init__(self.COLUMNS, self.ROWS)
+        
  
-    def play(self):
+    def update(self):
         # Perform your periodic check here
         # This function will be called every ... ms (value in self.timer.start(...))
         # Update the necessary data or trigger actions as needed
-        # call methods of Game object
-        #Game Loop
-       
-        while True:
+        if self.g.run:
             self.g.spawn_asteroids()
             self.g.update_asteroids()
-            if self.g.player_is_colliding() == True:
-                pass
+            
             self.draw_all_cells()
 
+            if self.g.player_is_colliding():
+                self.draw_game_over()
+ 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    grid_app = GridApp(g)
-    grid_app.play()
+    grid_app = GridApp()
     sys.exit(app.exec_())
